@@ -4,3 +4,6 @@
 [submodule "lib/v4-core"]
 	path = lib/v4-core
 	url = https://github.com/Uniswap/v4-core
+[submodule "lib/linea-attestation-registry"]
+	path = lib/linea-attestation-registry
+	url = https://github.com/Consensys/linea-attestation-registry
