@@ -7,3 +7,6 @@
 [submodule "lib/linea-attestation-registry"]
 	path = lib/linea-attestation-registry
 	url = https://github.com/Consensys/linea-attestation-registry
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
