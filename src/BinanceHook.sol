@@ -5,6 +5,7 @@ import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {BalanceDelta} from "v4-core/types/BalanceDelta.sol";
+import {AttestationRegistry} from "lar/AttestationRegistry.sol";
 
 contract BinanceAttestationHook is IHooks {
     error HookNotImplemented();
