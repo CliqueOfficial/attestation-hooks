@@ -1,18 +1,11 @@
 ```
 # in a new terminal, run the Forge script
-export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+export PRIVATE_KEY=
 forge script script/BinanceHook.sol \
      --rpc-url https://l2-uniswap-v4-hook-sandbox-6tl5qq8i4d.t.conduit.xyz \
     --broadcast
 ``
 ```
-
-# Hook Demo
-
-The demo below demonstrates issuing zkAttestations with Clique, verifying with ZKPs that the attestation value meets a required threshold,
-verifying the validation status in the V4-Hook, and allowing the swap to take place.
-
-![Demo](./docs/v4-hook.mp4)
 
 # Testing the Hook
 
