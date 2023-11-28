@@ -12,25 +12,39 @@ import {FeeLibrary} from "v4-core/libraries/FeeLibrary.sol";
 import {Currency, CurrencyLibrary} from "v4-core/types/Currency.sol";
 import {Fees} from "v4-core/Fees.sol";
 import {IConnector} from "./interfaces/IConnector.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract EASAttestationHook is BaseHook, Test {
+contract AttestationHook is BaseHook, Ownable {
     using FeeLibrary for uint24;
 
+    enum AttestationType {
+        EAS,
+        VERAX
+    }
+
+    AttestationType public _attestationType;
     IConnector _connector;
-    bytes32 _schema;
+    bytes32 _easSchema;
+    bytes32 _veraxSchema;
 
     error AttestationNotValid();
 
     constructor(
         IPoolManager _poolManager,
         address connector,
-        bytes32 schema
+        bytes32 easSchema,
+        bytes32 veraxSchema
     ) BaseHook(_poolManager) {
         _connector = IConnector(connector);
-        _schema = schema;
+        _easSchema = easSchema;
+        _veraxSchema = veraxSchema;
     }
 
-    // --- ----------------------- ---
+    function toggleAttestationType() public onlyOwner {
+        _attestationType = _attestationType == AttestationType.EAS
+            ? AttestationType.VERAX
+            : AttestationType.EAS;
+    }
 
     function collectHookFees(
         address recipient,
@@ -40,8 +54,8 @@ contract EASAttestationHook is BaseHook, Test {
         Fees(address(poolManager)).collectHookFees(recipient, currency, amount);
     }
 
-    function getFee(address, PoolKey calldata) external view returns (uint24) {
-        return 200_000;
+    function getFee(address, PoolKey calldata) external pure returns (uint24) {
+        return 0x5533;
     }
 
     function getHooksCalls() public pure override returns (Hooks.Calls memory) {
@@ -60,27 +74,48 @@ contract EASAttestationHook is BaseHook, Test {
 
     function beforeSwap(
         address,
-        PoolKey calldata key,
+        PoolKey calldata,
         IPoolManager.SwapParams calldata,
         bytes calldata
-    ) external override returns (bytes4) {
+    ) external view override returns (bytes4) {
+        bytes memory value = _attestationType == AttestationType.EAS
+            ? _easAttestation()
+            : _veraxAttestation();
+
+        if (abi.decode(value, (bool)) != true) revert AttestationNotValid();
+
+        return BaseHook.beforeSwap.selector;
+    }
+
+    function _easAttestation() internal view returns (bytes memory) {
         bytes32 attestationId = _connector.getReceivedAttestationUIDs(
             tx.origin,
-            _schema,
+            _easSchema,
             0,
             1,
             false
         )[0];
 
-        bytes memory value = _connector.getAttestationValueById(
-            _connector.VERAX(),
-            attestationId
-        );
+        return
+            _connector.getAttestationValueById(
+                _connector.VERAX(),
+                attestationId
+            );
+    }
 
-        if (abi.decode(value, (bool)) != true) {
-            revert AttestationNotValid();
-        }
+    function _veraxAttestation() internal view returns (bytes memory) {
+        bytes32 attestationId = _connector.getReceivedAttestationUIDs(
+            tx.origin,
+            _veraxSchema,
+            0,
+            1,
+            false
+        )[0];
 
-        return BaseHook.beforeSwap.selector;
+        return
+            _connector.getAttestationValueById(
+                _connector.VERAX(),
+                attestationId
+            );
     }
 }
