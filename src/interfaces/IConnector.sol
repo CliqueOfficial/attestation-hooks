@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
-import {Attestation as EASAttestation} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
-import {Attestation as VeraxAttestation} from "linea-attestation-registry/AttestationRegistry.sol";
+import {Attestation as EASAttestation} from "eas/IEAS.sol";
+import {Attestation as VeraxAttestation} from "lar/AttestationRegistry.sol";
 
 /**
  * @title IConnector
