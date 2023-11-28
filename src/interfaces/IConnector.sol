@@ -24,6 +24,18 @@ interface IConnector {
     error InvalidProtocolId();
 
     /**
+     * @notice Gets the EAS protocol ID.
+     * @return The EAS protocol ID.
+     */
+    function EAS() external view returns (bytes32);
+
+    /**
+     * @notice Gets the VERAX protocol ID.
+     * @return The VERAX protocol ID.
+     */
+    function VERAX() external view returns (bytes32);
+
+    /**
      * @notice Gets the attestation value by its ID.
      * @param protocolId The protocol ID (EAS or VERAX).
      * @param attestationId The attestation ID.

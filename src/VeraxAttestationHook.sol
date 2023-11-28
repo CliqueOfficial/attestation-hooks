@@ -12,21 +12,23 @@ import {FeeLibrary} from "v4-core/libraries/FeeLibrary.sol";
 import {Currency, CurrencyLibrary} from "v4-core/types/Currency.sol";
 import {Fees} from "v4-core/Fees.sol";
 import {IConnector} from "./interfaces/IConnector.sol";
-import "forge-std/Test.sol";
 
-contract AttestationHook is BaseHook, Test {
+contract VeraxAttestationHook is BaseHook, Test {
     using FeeLibrary for uint24;
 
     address _currentSwapper;
     IConnector _connector;
+    bytes32 _schema;
 
-    error MustUseDynamicFee();
+    error AttestationNotValid();
 
     constructor(
         IPoolManager _poolManager,
-        address connector
+        address connector,
+        bytes32 schema
     ) BaseHook(_poolManager) {
         _connector = IConnector(connector);
+        _schema = schema;
     }
 
     // --- ----------------------- ---
@@ -63,42 +65,20 @@ contract AttestationHook is BaseHook, Test {
         IPoolManager.SwapParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
-        _currentSwapper = tx.origin;
+        bytes32 attestationId = _connector.getAttestationIdsBySubjectBySchema(
+            abi.encode(tx.origin),
+            _schema
+        )[0];
+
+        bytes memory value = _connector.getAttestationValueById(
+            _connector.EAS(),
+            attestationId
+        );
+
+        if (abi.decode(value, (bool)) != true) {
+            revert AttestationNotValid();
+        }
 
         return BaseHook.beforeSwap.selector;
     }
-
-    function afterSwap(
-        address,
-        PoolKey calldata,
-        IPoolManager.SwapParams calldata,
-        BalanceDelta,
-        bytes calldata
-    ) external override returns (bytes4) {
-        _currentSwapper = address(0);
-        return BaseHook.afterSwap.selector;
-    }
 }
-
-// contract AttestationHookFactory is BaseFactory {
-//     constructor() BaseFactory(address(uint160(Hooks.BEFORE_SWAP_FLAG))) {}
-
-//     function deploy(
-//         IPoolManager poolManager,
-//         address connector,
-//         bytes32 salt
-//     ) public returns (address) {
-//         return address(new AttestationHook{salt: salt}(poolManager, connector));
-//     }
-
-//     function _hashBytecode(
-//         IPoolManager poolManager
-//     ) internal pure override returns (bytes32 bytecodeHash) {
-//         bytecodeHash = keccak256(
-//             abi.encodePacked(
-//                 type(AttestationHook).creationCode,
-//                 abi.encode(poolManager)
-//             )
-//         );
-//     }
-// }
