@@ -4,3 +4,4 @@ v4-core/=lib/v4-core/contracts/
 v4-core-test/=lib/v4-core/test/
 lar/=lib/linea-attestation-registry/contracts/src/
 openzeppelin/=lib/openzeppelin-contracts/contracts/
+eas/=lib/eas-contracts/contracts/
