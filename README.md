@@ -10,6 +10,8 @@ The hooks are implemented in the AttestationHook contract. This contract inherit
 
 The IConnector interface is used to interact with the Clique's Connector smart contract. This contract provides functions to get attestations and their values.
 
+Please note that the given attestation hook is just an example of what can be done. Many more functionalities will be added and the IConnector already allows for a wide range of possible queries on attestations.
+
 ## Disclaimer
 
 The Connector contract address along with mock registries for the conduit testnet will be released soon for testing hooks. Please stay tuned for updates.
