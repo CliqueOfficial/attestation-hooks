@@ -14,9 +14,16 @@ import {Fees} from "v4-core/Fees.sol";
 import {IConnector} from "./interfaces/IConnector.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title AttestationHook
+ * @dev This contract is used to perform attestation checks before a swap operation.
+ */
 contract AttestationHook is BaseHook, Ownable {
     using FeeLibrary for uint24;
 
+    /**
+     * @dev Enum to represent the type of attestation.
+     */
     enum AttestationType {
         EAS,
         VERAX
@@ -29,6 +36,13 @@ contract AttestationHook is BaseHook, Ownable {
 
     error AttestationNotValid();
 
+    /**
+     * @dev Constructor to initialize the contract with necessary parameters.
+     * @param _poolManager The pool manager.
+     * @param connector The connector address.
+     * @param easSchema The EAS schema.
+     * @param veraxSchema The Verax schema.
+     */
     constructor(
         IPoolManager _poolManager,
         address connector,
@@ -40,12 +54,21 @@ contract AttestationHook is BaseHook, Ownable {
         _veraxSchema = veraxSchema;
     }
 
+    /**
+     * @dev Function to toggle the type of attestation.
+     */
     function toggleAttestationType() public onlyOwner {
         _attestationType = _attestationType == AttestationType.EAS
             ? AttestationType.VERAX
             : AttestationType.EAS;
     }
 
+    /**
+     * @dev Function to collect hook fees.
+     * @param recipient The recipient of the fees.
+     * @param currency The currency of the fees.
+     * @param amount The amount of fees.
+     */
     function collectHookFees(
         address recipient,
         Currency currency,
@@ -54,10 +77,18 @@ contract AttestationHook is BaseHook, Ownable {
         Fees(address(poolManager)).collectHookFees(recipient, currency, amount);
     }
 
+    /**
+     * @dev Function to get the fee.
+     * @return The fee.
+     */
     function getFee(address, PoolKey calldata) external pure returns (uint24) {
         return 0x5533;
     }
 
+    /**
+     * @dev Function to get the hooks calls.
+     * @return The hooks calls.
+     */
     function getHooksCalls() public pure override returns (Hooks.Calls memory) {
         return
             Hooks.Calls({
@@ -72,6 +103,10 @@ contract AttestationHook is BaseHook, Ownable {
             });
     }
 
+    /**
+     * @dev Function to be called before a swap. Performs attestation checks.
+     * @return The selector of the beforeSwap function.
+     */
     function beforeSwap(
         address,
         PoolKey calldata,
@@ -87,6 +122,10 @@ contract AttestationHook is BaseHook, Ownable {
         return BaseHook.beforeSwap.selector;
     }
 
+    /**
+     * @dev Function to get the EAS attestation value.
+     * @return The EAS attestation vamue.
+     */
     function _easAttestation() internal view returns (bytes memory) {
         bytes32 attestationId = _connector.getReceivedAttestationUIDs(
             tx.origin,
@@ -103,6 +142,10 @@ contract AttestationHook is BaseHook, Ownable {
             );
     }
 
+    /**
+     * @dev Function to get the Verax attestation value.
+     * @return The Verax attestation value.
+     */
     function _veraxAttestation() internal view returns (bytes memory) {
         bytes32 attestationId = _connector.getReceivedAttestationUIDs(
             tx.origin,
